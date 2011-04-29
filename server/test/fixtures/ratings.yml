@@ -1,0 +1,15 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  dt: 2011-04-29 14:58:41
+  lat: 1.5
+  lon: 1.5
+  device_id: MyString
+  rating: 1
+
+two:
+  dt: 2011-04-29 14:58:41
+  lat: 1.5
+  lon: 1.5
+  device_id: MyString
+  rating: 1

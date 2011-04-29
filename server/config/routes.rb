@@ -1,4 +1,6 @@
 Server::Application.routes.draw do
+  resources :ratings
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
