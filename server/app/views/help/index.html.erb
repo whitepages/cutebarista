@@ -1,0 +1,10 @@
+<h2>Welcome to the Cute Barista Backend Server</h2>
+
+<p>You can't do much through the web interface but we expose these RESTful
+methods to record new ratings and fetch existing ratings within a goegraphic
+bounding box:</p>
+
+<ul>
+  <li><code>POST /rating?dt=an_iso_datetime&amp;lat=float&amp;long=float&amp;device_id=string&amp;rating=integer</code></li>
+  <li><code>GET /rating?top=float&amp;left=float&amp;bottom=float&amp;right=float&amp;max=integer&amp;device_id=string</code></li>
+</ul>

@@ -1,5 +1,9 @@
 Server::Application.routes.draw do
+  get "help/index"
+
   resources :ratings
+
+  root :to => 'help#index'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
