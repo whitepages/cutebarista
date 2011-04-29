@@ -1,4 +1,6 @@
-package com.whitepages;
+package com.whitepages.cutebarista;
+
+import com.whitepages.cutebarista.R;
 
 import android.app.Activity;
 import android.os.Bundle;

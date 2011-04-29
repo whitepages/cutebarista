@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package com.whitepages;
+package com.whitepages.cutebarista;
 
 public final class R {
     public static final class attr {
