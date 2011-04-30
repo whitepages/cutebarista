@@ -1,7 +1,16 @@
 class RatingsController < ApplicationController
 
+  Q_BOUNDS = { # maps param arguments to query modifier methods
+    :top    => :south_of,
+    :bottom => :north_of,
+    :left   => :east_of,
+    :right  => :west_of,
+    :max    => :limit,
+  }
   def index
-    @ratings = Rating.all
+    @q = Rating
+    Q_BOUNDS.each_pair { |p,m| @q = @q.send(m,params[p]) if params[p] }
+    @ratings = @q.all
     @entries = @ratings.map { |r| map_attrs_out(r) }
     @result = { :entries => @entries }
     render :json => @result

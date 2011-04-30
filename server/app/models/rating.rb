@@ -10,4 +10,16 @@ class Rating < ActiveRecord::Base
   before_validation(:on => :create) do
     self.dt = Time.now
   end
+
+  scope :south_of, lambda { |top| where('lat <= ?',top) }
+  scope :north_of, lambda { |bot| where('lat >= ?',bot) }
+  scope :east_of,  lambda { |lft| where('lon >= ?',lft) }
+  scope :west_of,  lambda { |rgt| where('lon <= ?',rgt) }
+  scope :within_bounds, lambda { |top,lft,bot,rgt|
+    south_of(top).
+    east_of(lft).
+    north_of(bot).
+    west_of(rgt)
+  }
+
 end
