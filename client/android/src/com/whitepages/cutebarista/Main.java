@@ -1,10 +1,33 @@
 package com.whitepages.cutebarista;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.location.Location;
+import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
+import android.text.format.Time;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
@@ -30,7 +53,6 @@ public class Main extends Activity implements OnClickListener
         
 		ImageButton findCuteButton = (ImageButton) findViewById(R.id.button_find_cute);
 		findCuteButton.setOnClickListener(this);		
-
     }
     
 	
@@ -80,10 +102,49 @@ public class Main extends Activity implements OnClickListener
      */
 	public void clickedCute()
 	{
+		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		// Or use LocationManager.GPS_PROVIDER
+		Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		double lat = lastKnownLocation.getLatitude();
+		double lon = lastKnownLocation.getLongitude();
+		
+		sendCuteBaristaMessage(lat, lon, 1);
 		showDialog(DIALOG_CLICKED_CUTE);
-
 	}
 
+	
+	public void sendCuteBaristaMessage(double lat, double lon, int rating)
+	{
+		TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+		String deviceid = telephonyManager.getDeviceId();
+		String dateTimeString = DateFormat.getDateInstance().format(new Date());
+		
+	
+	    // Create a new HttpClient and Post Header
+	    HttpClient httpclient = new DefaultHttpClient();
+	    HttpPost httppost = new HttpPost("http://localhost:3000/ratings");
+
+	    try {
+	        // Add your data
+	        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(5);
+	        nameValuePairs.add(new BasicNameValuePair("dt", dateTimeString));
+	        nameValuePairs.add(new BasicNameValuePair("device_id", deviceid));
+	        nameValuePairs.add(new BasicNameValuePair("lat", String.valueOf(lat)));
+	        nameValuePairs.add(new BasicNameValuePair("lon", String.valueOf(lon)));
+	        nameValuePairs.add(new BasicNameValuePair("rating", String.valueOf(rating)));
+	        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+	        // Execute HTTP Post Request
+	        HttpResponse response = httpclient.execute(httppost);
+	        
+	    } catch (ClientProtocolException e) {
+	        // Do something interesting here
+	    } catch (IOException e) {
+	        // Do something interesting here
+	    }
+	}
+
+	
     /**
      *  Handle clicking the "Not Cute" button
      */
