@@ -12,10 +12,11 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-
+import org.apache.http.params.BasicHttpParams;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -37,6 +38,7 @@ public class Main extends Activity implements OnClickListener, LocationListener
 	static final int DIALOG_CLICKED_NOT_CUTE = 1;
 	
 	Location mLastGoodLocation = null;
+	Dialog mDialog = null;
 	
 	/** Called when the activity is first created. */
     @Override
@@ -83,10 +85,10 @@ public class Main extends Activity implements OnClickListener, LocationListener
 	 */
 	protected Dialog onCreateDialog(int id) 
 	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		switch(id)
 		{
 			case DIALOG_CLICKED_CUTE:
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setMessage("You found a cute barista, nice!");
 				builder.setCancelable(false);
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -165,13 +167,50 @@ public class Main extends Activity implements OnClickListener, LocationListener
      */
 	public void clickedFindCute()
 	{
+		if (mLastGoodLocation != null)
+		{
+			double lat = mLastGoodLocation.getLatitude();
+			double lon = mLastGoodLocation.getLongitude();
+			
+			sendFindBarisasRequest(lat, lon);
+		}		
 	}
  
 	
+	public void sendFindBarisasRequest(double lat, double lon)
+	{
+		// /ratings?device_id=foo&max=10&top=1&bottom=-1&left=9&right=11"
+		TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+		String deviceid = telephonyManager.getDeviceId();		
+	
+	    // Create a new HttpClient and Get Request 
+	    HttpClient httpclient = new DefaultHttpClient();
+	    String uri = "http://10.0.2.2:3000/ratings";
+	    uri += "?device_id=" + deviceid;
+	    uri += "&max=25";
+	    uri += "&top=" + (lat - 0.01);
+	    uri += "&bottom=" + (lat + 0.01);
+	    uri += "&left=" + (lon - 0.05);
+	    uri += "&right=" + (lon + 0.05);
+	    HttpGet httpget = new HttpGet(uri);
+
+	    try {	    	
+	        HttpResponse response = httpclient.execute(httpget);
+	        Log.w("NET", response.toString());
+	        
+	    } catch (ClientProtocolException e) {
+	        // Do something interesting here
+	    	e.printStackTrace();
+	    } catch (IOException e) {
+	        // Do something interesting here
+	    	e.printStackTrace();
+	    }
+	}
 	
 	/*******************************
 	 *  LOCATION 
 	 *******************************/
+	
 	
 	public void onLocationChanged(Location location) 
 	{	
