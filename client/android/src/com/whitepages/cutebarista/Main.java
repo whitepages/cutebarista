@@ -105,11 +105,14 @@ public class Main extends Activity implements OnClickListener
 		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		// Or use LocationManager.GPS_PROVIDER
 		Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		double lat = lastKnownLocation.getLatitude();
-		double lon = lastKnownLocation.getLongitude();
-		
-		sendCuteBaristaMessage(lat, lon, 1);
-		showDialog(DIALOG_CLICKED_CUTE);
+		if (lastKnownLocation != null)
+		{
+			double lat = lastKnownLocation.getLatitude();
+			double lon = lastKnownLocation.getLongitude();
+			
+			sendCuteBaristaMessage(lat, lon, 1);
+			showDialog(DIALOG_CLICKED_CUTE);
+		}
 	}
 
 	
