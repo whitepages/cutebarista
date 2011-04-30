@@ -1,9 +1,8 @@
 package com.whitepages.cutebarista;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -23,20 +22,21 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
-import android.text.format.Time;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 
-public class Main extends Activity implements OnClickListener
+public class Main extends Activity implements OnClickListener, LocationListener
 {
 	static final int DIALOG_CLICKED_CUTE = 0;
 	static final int DIALOG_CLICKED_NOT_CUTE = 1;
 	
+	Location mLastGoodLocation = null;
 	
 	/** Called when the activity is first created. */
     @Override
@@ -53,6 +53,9 @@ public class Main extends Activity implements OnClickListener
         
 		ImageButton findCuteButton = (ImageButton) findViewById(R.id.button_find_cute);
 		findCuteButton.setOnClickListener(this);		
+		
+		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
     }
     
 	
@@ -101,14 +104,11 @@ public class Main extends Activity implements OnClickListener
      *  Handle clicking the "Cute" button
      */
 	public void clickedCute()
-	{
-		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-		// Or use LocationManager.GPS_PROVIDER
-		Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		if (lastKnownLocation != null)
+	{		
+		if (mLastGoodLocation != null)
 		{
-			double lat = lastKnownLocation.getLatitude();
-			double lon = lastKnownLocation.getLongitude();
+			double lat = mLastGoodLocation.getLatitude();
+			double lon = mLastGoodLocation.getLongitude();
 			
 			sendCuteBaristaMessage(lat, lon, 1);
 			showDialog(DIALOG_CLICKED_CUTE);
@@ -120,12 +120,13 @@ public class Main extends Activity implements OnClickListener
 	{
 		TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 		String deviceid = telephonyManager.getDeviceId();
-		String dateTimeString = DateFormat.getDateInstance().format(new Date());
 		
+		DateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		String dateTimeString = f.format(new Date());
 	
 	    // Create a new HttpClient and Post Header
 	    HttpClient httpclient = new DefaultHttpClient();
-	    HttpPost httppost = new HttpPost("http://localhost:3000/ratings");
+	    HttpPost httppost = new HttpPost("http://10.0.2.2:3000/ratings");
 
 	    try {
 	        // Add your data
@@ -139,11 +140,14 @@ public class Main extends Activity implements OnClickListener
 
 	        // Execute HTTP Post Request
 	        HttpResponse response = httpclient.execute(httppost);
+	        Log.w("NET", response.toString());
 	        
 	    } catch (ClientProtocolException e) {
 	        // Do something interesting here
+	    	e.printStackTrace();
 	    } catch (IOException e) {
 	        // Do something interesting here
+	    	e.printStackTrace();
 	    }
 	}
 
@@ -162,5 +166,21 @@ public class Main extends Activity implements OnClickListener
 	public void clickedFindCute()
 	{
 	}
-  
+ 
+	
+	
+	/*******************************
+	 *  LOCATION 
+	 *******************************/
+	
+	public void onLocationChanged(Location location) 
+	{	
+		mLastGoodLocation = location;
+	}
+	
+	public void onStatusChanged(String provider, int status, Bundle extras) {}
+	
+	public void onProviderEnabled(String provider) {}
+	
+	public void onProviderDisabled(String provider) {}
 }
